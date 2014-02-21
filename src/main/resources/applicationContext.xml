@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd">
+
+
+    <bean id="controller" class="com.xianlinbox.hystrix.controller.CustomerController">
+        <property name="customerService" ref="customerService"/>
+    </bean>
+    <bean id="customerService" class="com.xianlinbox.hystrix.service.CustomerService">
+        <property name="contactDao" ref="contactDao"/>
+        <property name="addressDao" ref="addressDao"/>
+    </bean>
+    <bean id="contactDao" class="com.xianlinbox.hystrix.dao.ContactDao"/>
+    <bean id="addressDao" class="com.xianlinbox.hystrix.dao.AddressDao"/>
+
+    <bean id="contactDaoCommand" class="com.xianlinbox.hystrix.dao.HystrixCommandAdvice">
+        <property name="groupName" value="Contact"/>
+        <property name="commandName" value="Contact"/>
+    </bean>
+    <bean id="addressDaoCommand" class="com.xianlinbox.hystrix.dao.HystrixCommandAdvice">
+        <property name="groupName" value="Address"/>
+        <property name="commandName" value="Address"/>
+    </bean>
+
+
+    <aop:config>
+        <aop:aspect id="contactServiceAspect" ref="contactDaoCommand">
+            <aop:pointcut id="contactServiceTarget"
+                          expression="execution(* com.xianlinbox.hystrix.dao.ContactDao.getContact(..))"/>
+            <aop:around method="runCommand" pointcut-ref="contactServiceTarget"/>
+        </aop:aspect>
+    </aop:config>
+
+    <aop:config>
+        <aop:aspect id="addressServiceAspect" ref="addressDaoCommand">
+            <aop:pointcut id="addressServiceTarget"
+                          expression="execution(* com.xianlinbox.hystrix.dao.AddressDao.getAddress(..))"/>
+            <aop:around method="runCommand" pointcut-ref="addressServiceTarget"/>
+        </aop:aspect>
+    </aop:config>
+</beans>

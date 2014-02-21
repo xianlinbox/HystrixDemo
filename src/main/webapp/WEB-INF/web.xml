@@ -1,0 +1,47 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app id="spring-ws-rest"
+         xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+	        http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd
+            http://java.sun.com/xml/ns/j2ee ">
+
+    <display-name>Hystrix Demo</display-name>
+
+    <filter>
+        <display-name>HystrixRequestContextServletFilter</display-name>
+        <filter-name>HystrixRequestContextServletFilter</filter-name>
+        <filter-class>com.xianlinbox.hystrix.filter.HystrixRequestContextServletFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>HystrixRequestContextServletFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>spring</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>spring</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>
