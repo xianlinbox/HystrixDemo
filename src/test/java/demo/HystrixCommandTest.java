@@ -1,5 +1,8 @@
 package demo;
 
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixEventType;
+import com.netflix.hystrix.HystrixRequestLog;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -10,7 +13,9 @@ import rx.util.functions.Action1;
 
 import java.util.concurrent.Future;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class HystrixCommandTest {
@@ -141,4 +146,25 @@ public class HystrixCommandTest {
             context.shutdown();
         }
     }
+
+
+    @Test
+    public void collapseCommandTest() throws Exception {
+        HystrixRequestContext context = HystrixRequestContext.initializeContext();
+
+        try {
+            Future<String> result1 = new CollapseEchoHystrixCommand("xianlinbox-1").queue();
+            Future<String> result2 = new CollapseEchoHystrixCommand("xianlinbox-2").queue();
+            Future<String> result3 = new CollapseEchoHystrixCommand("xianlinbox-3").queue();
+
+            assertThat(result1.get(),equalTo("Echo: xianlinbox-1"));
+            assertThat(result2.get(),equalTo("Echo: xianlinbox-2"));
+            assertThat(result3.get(),equalTo("Echo: xianlinbox-3"));
+
+            assertEquals(1, HystrixRequestLog.getCurrentRequest().getExecutedCommands().size());
+        } finally {
+            context.shutdown();
+        }
+    }
+
 }
